@@ -24,7 +24,7 @@ install_forge_skill() {
   local backup_path=""
 
   target_parent="$(dirname "$target_path")"
-  staging_path="\${target_path}.staging-$$"
+  staging_path="${target_path}.staging-$$"
 
   mkdir -p "$target_parent"
   mkdir -p "$staging_path"
@@ -34,7 +34,7 @@ install_forge_skill() {
   cp "$source_root/VERSION" "$staging_path/VERSION"
 
   if [[ -e "$target_path" ]]; then
-    backup_path="\${target_path}.backup-$(date +%Y%m%d-%H%M%S)"
+    backup_path="${target_path}.backup-$(date +%Y%m%d-%H%M%S)"
     mv "$target_path" "$backup_path"
   fi
 
@@ -67,7 +67,7 @@ if command_available agy; then
 fi
 
 if command_available codex; then
-  codex_home="\${CODEX_HOME:-$HOME/.codex}"
+  codex_home="${CODEX_HOME:-$HOME/.codex}"
   agent_names+=("Codex")
   agent_paths+=("$codex_home/skills/forge")
   agent_invocations+=("\$forge")
@@ -79,7 +79,7 @@ if command_available opencode; then
   agent_invocations+=("/forge")
 fi
 
-if [[ "\${#agent_names[@]}" -eq 0 ]]; then
+if [[ "${#agent_names[@]}" -eq 0 ]]; then
   printf '\nForge did not detect a supported coding-agent CLI in PATH.\n'
   printf 'Supported targets: claude, agy, codex, opencode.\n'
   printf 'Install or expose the desired CLI in PATH, then run this installer again.\n'
@@ -87,7 +87,7 @@ if [[ "\${#agent_names[@]}" -eq 0 ]]; then
 fi
 
 printf '\nForge installer\n\nDetected:\n'
-for agent_name in "\${agent_names[@]}"; do
+for agent_name in "${agent_names[@]}"; do
   printf '  - %s\n' "$agent_name"
 done
 
@@ -120,9 +120,9 @@ forge_version="$(tr -d '\r\n' < "$source_root/VERSION")"
 
 printf '\nInstalling Forge %s...\n' "$forge_version"
 
-for index in "\${!agent_names[@]}"; do
-  backup_path="$(install_forge_skill "$source_root" "\${agent_paths[$index]}")"
-  printf '  [OK] %s -> %s\n' "\${agent_names[$index]}" "\${agent_paths[$index]}"
+for index in "${!agent_names[@]}"; do
+  backup_path="$(install_forge_skill "$source_root" "${agent_paths[$index]}")"
+  printf '  [OK] %s -> %s\n' "${agent_names[$index]}" "${agent_paths[$index]}"
 
   if [[ -n "$backup_path" ]]; then
     printf '       Previous Forge installation backed up to %s\n' "$backup_path"
@@ -133,6 +133,6 @@ printf '\nForge %s installed.\n' "$forge_version"
 printf 'Restart any open coding-agent sessions so they rediscover the skill.\n'
 printf '\nInvoke Forge with:\n'
 
-for index in "\${!agent_names[@]}"; do
-  printf '  %s: %s\n' "\${agent_names[$index]}" "\${agent_invocations[$index]}"
+for index in "${!agent_names[@]}"; do
+  printf '  %s: %s\n' "${agent_names[$index]}" "${agent_invocations[$index]}"
 done

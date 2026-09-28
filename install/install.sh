@@ -19,6 +19,7 @@ command_available() {
 install_forge_skill() {
   local source_root="$1"
   local target_path="$2"
+  local skill_entry="$3"
   local target_parent
   local staging_path
   local backup_path=""
@@ -29,8 +30,9 @@ install_forge_skill() {
   mkdir -p "$target_parent"
   mkdir -p "$staging_path"
 
-  cp "$source_root/SKILL.md" "$staging_path/SKILL.md"
+  cp "$source_root/$skill_entry" "$staging_path/SKILL.md"
   cp -R "$source_root/rules" "$staging_path/rules"
+  cp -R "$source_root/modes" "$staging_path/modes"
   cp "$source_root/VERSION" "$staging_path/VERSION"
 
   if [[ -e "$target_path" ]]; then
@@ -53,17 +55,20 @@ install_forge_skill() {
 declare -a agent_names=()
 declare -a agent_paths=()
 declare -a agent_invocations=()
+declare -a agent_flash_invocations=()
 
 if command_available claude; then
   agent_names+=("Claude Code")
   agent_paths+=("$HOME/.claude/skills/forge")
   agent_invocations+=("/forge")
+  agent_flash_invocations+=("/forge-flash")
 fi
 
 if command_available agy; then
   agent_names+=("Antigravity CLI")
   agent_paths+=("$HOME/.gemini/antigravity-cli/skills/forge")
   agent_invocations+=("/forge")
+  agent_flash_invocations+=("/forge-flash")
 fi
 
 if command_available codex; then
@@ -71,12 +76,14 @@ if command_available codex; then
   agent_names+=("Codex")
   agent_paths+=("$codex_home/skills/forge")
   agent_invocations+=("\$forge")
+  agent_flash_invocations+=("\$forge-flash")
 fi
 
 if command_available opencode; then
   agent_names+=("OpenCode")
   agent_paths+=("$HOME/.config/opencode/skills/forge")
   agent_invocations+=("/forge")
+  agent_flash_invocations+=("/forge-flash")
 fi
 
 if [[ "${#agent_names[@]}" -eq 0 ]]; then
@@ -116,23 +123,37 @@ if [[ ! -f "$source_root/SKILL.md" ]]; then
   exit 1
 fi
 
+if [[ ! -f "$source_root/commands/forge-flash/SKILL.md" ]]; then
+  printf 'Downloaded Forge package does not contain the Forge Flash skill.\n' >&2
+  exit 1
+fi
+
 forge_version="$(tr -d '\r\n' < "$source_root/VERSION")"
 
 printf '\nInstalling Forge %s...\n' "$forge_version"
 
 for index in "${!agent_names[@]}"; do
-  backup_path="$(install_forge_skill "$source_root" "${agent_paths[$index]}")"
-  printf '  [OK] %s -> %s\n' "${agent_names[$index]}" "${agent_paths[$index]}"
+  backup_path="$(install_forge_skill "$source_root" "${agent_paths[$index]}" "SKILL.md")"
+  printf '  [OK] %s Forge -> %s\n' "${agent_names[$index]}" "${agent_paths[$index]}"
 
   if [[ -n "$backup_path" ]]; then
     printf '       Previous Forge installation backed up to %s\n' "$backup_path"
   fi
+
+  flash_target_path="$(dirname "${agent_paths[$index]}")/forge-flash"
+  flash_backup_path="$(install_forge_skill "$source_root" "$flash_target_path" "commands/forge-flash/SKILL.md")"
+  printf '  [OK] %s Flash -> %s\n' "${agent_names[$index]}" "$flash_target_path"
+
+  if [[ -n "$flash_backup_path" ]]; then
+    printf '       Previous Forge Flash installation backed up to %s\n' "$flash_backup_path"
+  fi
 done
 
 printf '\nForge %s installed.\n' "$forge_version"
-printf 'Restart any open coding-agent sessions so they rediscover the skill.\n'
+printf 'Restart any open coding-agent sessions so they rediscover the skills.\n'
 printf '\nInvoke Forge with:\n'
 
 for index in "${!agent_names[@]}"; do
   printf '  %s: %s\n' "${agent_names[$index]}" "${agent_invocations[$index]}"
+  printf '  %s Flash: %s <task>\n' "${agent_names[$index]}" "${agent_flash_invocations[$index]}"
 done

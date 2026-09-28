@@ -21,20 +21,23 @@ function Add-AgentTarget {
         [System.Collections.ArrayList]$Targets,
         [string]$Name,
         [string]$Path,
-        [string]$Invocation
+        [string]$Invocation,
+        [string]$FlashInvocation
     )
 
     [void]$Targets.Add([pscustomobject]@{
         Name = $Name
         Path = $Path
         Invocation = $Invocation
+        FlashInvocation = $FlashInvocation
     })
 }
 
 function Install-ForgeSkill {
     param(
         [string]$SourceRoot,
-        [string]$TargetPath
+        [string]$TargetPath,
+        [string]$SkillEntry
     )
 
     $targetParent = Split-Path -Parent $TargetPath
@@ -44,8 +47,9 @@ function Install-ForgeSkill {
     New-Item -ItemType Directory -Path $targetParent -Force | Out-Null
     New-Item -ItemType Directory -Path $stagingPath -Force | Out-Null
 
-    Copy-Item -Path (Join-Path $SourceRoot "SKILL.md") -Destination (Join-Path $stagingPath "SKILL.md")
+    Copy-Item -Path (Join-Path $SourceRoot $SkillEntry) -Destination (Join-Path $stagingPath "SKILL.md")
     Copy-Item -Path (Join-Path $SourceRoot "rules") -Destination (Join-Path $stagingPath "rules") -Recurse
+    Copy-Item -Path (Join-Path $SourceRoot "modes") -Destination (Join-Path $stagingPath "modes") -Recurse
     Copy-Item -Path (Join-Path $SourceRoot "VERSION") -Destination (Join-Path $stagingPath "VERSION")
 
     if (Test-Path $TargetPath) {
@@ -71,20 +75,20 @@ function Install-ForgeSkill {
 $targets = [System.Collections.ArrayList]::new()
 
 if (Test-CommandAvailable "claude") {
-    Add-AgentTarget -Targets $targets -Name "Claude Code" -Path (Join-Path $userHome ".claude\skills\forge") -Invocation "/forge"
+    Add-AgentTarget -Targets $targets -Name "Claude Code" -Path (Join-Path $userHome ".claude\skills\forge") -Invocation "/forge" -FlashInvocation "/forge-flash"
 }
 
 if (Test-CommandAvailable "agy") {
-    Add-AgentTarget -Targets $targets -Name "Antigravity CLI" -Path (Join-Path $userHome ".gemini\antigravity-cli\skills\forge") -Invocation "/forge"
+    Add-AgentTarget -Targets $targets -Name "Antigravity CLI" -Path (Join-Path $userHome ".gemini\antigravity-cli\skills\forge") -Invocation "/forge" -FlashInvocation "/forge-flash"
 }
 
 if (Test-CommandAvailable "codex") {
     $codexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $userHome ".codex" }
-    Add-AgentTarget -Targets $targets -Name "Codex" -Path (Join-Path $codexHome "skills\forge") -Invocation '$forge'
+    Add-AgentTarget -Targets $targets -Name "Codex" -Path (Join-Path $codexHome "skills\forge") -Invocation '$forge' -FlashInvocation '$forge-flash'
 }
 
 if (Test-CommandAvailable "opencode") {
-    Add-AgentTarget -Targets $targets -Name "OpenCode" -Path (Join-Path $userHome ".config\opencode\skills\forge") -Invocation "/forge"
+    Add-AgentTarget -Targets $targets -Name "OpenCode" -Path (Join-Path $userHome ".config\opencode\skills\forge") -Invocation "/forge" -FlashInvocation "/forge-flash"
 }
 
 if ($targets.Count -eq 0) {
@@ -116,28 +120,41 @@ try {
         throw "Downloaded Forge package does not contain SKILL.md."
     }
 
+    if (-not (Test-Path (Join-Path $sourceRoot "commands\forge-flash\SKILL.md"))) {
+        throw "Downloaded Forge package does not contain the Forge Flash skill."
+    }
+
     $forgeVersion = (Get-Content (Join-Path $sourceRoot "VERSION") -Raw).Trim()
 
     Write-Host ""
     Write-Host "Installing Forge $forgeVersion..."
 
     foreach ($target in $targets) {
-        $backupPath = Install-ForgeSkill -SourceRoot $sourceRoot -TargetPath $target.Path
-        Write-Host "  [OK] $($target.Name) -> $($target.Path)"
+        $backupPath = Install-ForgeSkill -SourceRoot $sourceRoot -TargetPath $target.Path -SkillEntry "SKILL.md"
+        Write-Host "  [OK] $($target.Name) Forge -> $($target.Path)"
 
         if ($backupPath) {
             Write-Host "       Previous Forge installation backed up to $backupPath"
+        }
+
+        $flashTargetPath = Join-Path (Split-Path -Parent $target.Path) "forge-flash"
+        $flashBackupPath = Install-ForgeSkill -SourceRoot $sourceRoot -TargetPath $flashTargetPath -SkillEntry "commands\forge-flash\SKILL.md"
+        Write-Host "  [OK] $($target.Name) Flash -> $flashTargetPath"
+
+        if ($flashBackupPath) {
+            Write-Host "       Previous Forge Flash installation backed up to $flashBackupPath"
         }
     }
 
     Write-Host ""
     Write-Host "Forge $forgeVersion installed."
-    Write-Host "Restart any open coding-agent sessions so they rediscover the skill."
+    Write-Host "Restart any open coding-agent sessions so they rediscover the skills."
     Write-Host ""
     Write-Host "Invoke Forge with:"
 
     foreach ($target in $targets) {
         Write-Host "  $($target.Name): $($target.Invocation)"
+        Write-Host "  $($target.Name) Flash: $($target.FlashInvocation) <task>"
     }
 }
 finally {

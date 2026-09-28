@@ -8,20 +8,20 @@ Forge is not a coding agent. The coding agent is the worker; Forge is the develo
 
 ## Current version
 
-`0.1.0`
+`0.2.0`
 
 ## Supported CLI targets
 
 The installer currently detects and installs Forge for:
 
-| Agent | Installed to | Invoke |
+| Agent | Forge | Flash Mode |
 | --- | --- | --- |
-| Claude Code | `~/.claude/skills/forge/` | `/forge` |
-| Antigravity CLI | `~/.gemini/antigravity-cli/skills/forge/` | `/forge` |
-| Codex | `$CODEX_HOME/skills/forge/` or `~/.codex/skills/forge/` | `$forge` |
-| OpenCode | `~/.config/opencode/skills/forge/` | `/forge` |
+| Claude Code | `/forge` | `/forge-flash <task>` |
+| Antigravity CLI | `/forge` | `/forge-flash <task>` |
+| Codex | `$forge` | `$forge-flash <task>` |
+| OpenCode | `/forge` | `/forge-flash <task>` |
 
-Forge uses the same `SKILL.md` and rule files for every supported agent.
+Forge uses the same rule files for every supported agent.
 
 ## Install
 
@@ -41,9 +41,11 @@ The installer:
 
 1. Detects supported coding-agent CLIs available in `PATH`.
 2. Downloads the latest Forge package from this repository.
-3. Installs `SKILL.md`, `rules/`, and `VERSION` into each detected agent's global skill directory.
-4. Backs up an existing Forge installation before replacing it.
-5. Prints the correct invocation command for every installed agent.
+3. Installs the main `forge` skill.
+4. Installs the `forge-flash` companion skill.
+5. Copies the approved `rules/`, execution `modes/`, and `VERSION` into each installed skill package.
+6. Backs up existing Forge installations before replacing them.
+7. Prints the correct invocation commands for every installed agent.
 
 Restart any coding-agent session that was already open during installation so it can rediscover Forge.
 
@@ -59,7 +61,7 @@ Example with Antigravity:
 agy
 ```
 
-Then activate Forge:
+Then activate normal Forge:
 
 ```text
 /forge
@@ -84,6 +86,37 @@ When Forge activates, it should first:
 7. Establish the working rules for the session.
 8. Begin development.
 
+## Flash Mode
+
+Use Flash Mode for large development tasks that benefit from multiple parallel agents.
+
+Example:
+
+```text
+/forge-flash migrate this React app to Next.js with TypeScript
+```
+
+Codex:
+
+```text
+$forge-flash migrate this React app to Next.js with TypeScript
+```
+
+Flash Mode:
+
+1. Performs the normal Forge startup audit.
+2. Loads all four approved Forge rules.
+3. Builds a dependency-aware execution plan.
+4. Splits independent work into explicit agent-owned workstreams.
+5. Runs safe workstreams concurrently when the host supports parallel agents.
+6. Integrates all worker output centrally.
+7. Reviews the combined result.
+8. Runs applicable verification such as typecheck, lint, tests, and build.
+
+**Every Flash orchestrator, worker, subagent, integration agent, reviewer, and verifier must follow all four Forge rules, applicable project rules, and session conflict resolutions.**
+
+Flash achieves speed through parallel execution, not by skipping rules, analysis, integration, review, or verification.
+
 ## Skill structure
 
 ```text
@@ -95,6 +128,11 @@ Forge/
 │   ├── 02-non-destructive-changes.md
 │   ├── 03-comments.md
 │   └── 04-naming.md
+├── modes/
+│   └── flash.md
+├── commands/
+│   └── forge-flash/
+│       └── SKILL.md
 ├── install/
 │   ├── install.ps1
 │   └── install.sh
@@ -104,6 +142,10 @@ Forge/
 `SKILL.md` is the portable Forge controller.
 
 The files in `rules/` are the approved development rules and remain the source of truth.
+
+`modes/flash.md` defines Flash execution behavior.
+
+`commands/forge-flash/SKILL.md` is the dedicated Flash entry point installed as the companion `forge-flash` skill.
 
 ## Approved rule hierarchy
 
@@ -132,9 +174,17 @@ The files in `rules/` are the approved development rules and remain the source o
    - Name components, sections, functions, variables, files, folders, services, and APIs according to what they represent or do.
    - Avoid vague, generic, numbered, misleading, or unnecessarily abbreviated names when a meaningful name is possible.
 
-## Planned companion commands
+## Execution modes
 
-The primary Forge skill is implemented now. These companion commands remain planned:
+### Flash Mode
+
+Flash is a large-task execution mode, not a replacement rule set.
+
+Its hard requirement is that every delegated agent inherits the complete active Forge rule set and applicable project rules.
+
+The orchestrator plans dependencies, assigns non-overlapping ownership where possible, executes safe work in parallel, integrates results, runs a whole-task review, and verifies the final result.
+
+## Planned companion commands
 
 | Command | Purpose |
 | --- | --- |
@@ -153,4 +203,4 @@ Planned terminal management commands:
 | `forge version` | Show the installed Forge version. |
 | `forge doctor` | Diagnose Forge and agent integration. |
 
-For version `0.1.0`, use the one-line installer to install or update Forge.
+For version `0.2.0`, use the one-line installer to install or update Forge.

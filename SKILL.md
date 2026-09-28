@@ -66,6 +66,18 @@ The files below are mandatory Forge rules:
 
 Read them when Forge activates. Re-read a specific rule when its exact wording matters.
 
+## Execution modes
+
+Execution modes may change how Forge carries out work, but they never replace or weaken the approved Forge rules.
+
+Available mode:
+
+- `modes/flash.md` — dependency-aware parallel execution for large tasks.
+
+Flash Mode is explicit only. When it is activated, every orchestrator, worker, subagent, integration agent, reviewer, and verifier must inherit the complete active Forge rule set, applicable project rules, and user-approved conflict resolutions.
+
+The dedicated entry point is `/forge-flash <task>` on Claude Code, Antigravity CLI, and OpenCode, and `$forge-flash <task>` on Codex.
+
 ## Session behavior
 
 After the startup audit is complete:

@@ -63,6 +63,7 @@ The files below are mandatory Forge rules:
 2. `rules/02-non-destructive-changes.md`
 3. `rules/03-comments.md`
 4. `rules/04-naming.md`
+5. `rules/05-git-commits.md`
 
 Read them when Forge activates. Re-read a specific rule when its exact wording matters.
 
@@ -97,4 +98,8 @@ Before considering a Forge-governed change complete, confirm that:
 - no unresolved project-rule conflict was silently bypassed;
 - no destructive cleanup occurred merely to enforce Forge;
 - new comments follow the comment rule;
-- new names follow the naming rule.
+- new names follow the naming rule;
+- meaningful completed work is committed according to the Git commit rule;
+- unrelated changes are not included in the commit;
+- sensitive files or credentials are not committed;
+- the commit message follows Conventional Commits.

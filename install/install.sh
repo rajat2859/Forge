@@ -128,6 +128,11 @@ if [[ ! -f "$source_root/commands/forge-flash/SKILL.md" ]]; then
   exit 1
 fi
 
+if [[ ! -f "$source_root/commands/forge-update/SKILL.md" ]]; then
+  printf 'Downloaded Forge package does not contain the Forge Update skill.\n' >&2
+  exit 1
+fi
+
 forge_version="$(tr -d '\r\n' < "$source_root/VERSION")"
 
 printf '\nInstalling Forge %s...\n' "$forge_version"
@@ -146,6 +151,14 @@ for index in "${!agent_names[@]}"; do
 
   if [[ -n "$flash_backup_path" ]]; then
     printf '       Previous Forge Flash installation backed up to %s\n' "$flash_backup_path"
+  fi
+
+  update_target_path="$(dirname "${agent_paths[$index]}")/forge-update"
+  update_backup_path="$(install_forge_skill "$source_root" "$update_target_path" "commands/forge-update/SKILL.md")"
+  printf '  [OK] %s Update -> %s\n' "${agent_names[$index]}" "$update_target_path"
+
+  if [[ -n "$update_backup_path" ]]; then
+    printf '       Previous Forge Update installation backed up to %s\n' "$update_backup_path"
   fi
 done
 

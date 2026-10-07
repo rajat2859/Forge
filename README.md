@@ -8,7 +8,7 @@ Forge is not a coding agent. The coding agent is the worker; Forge is the develo
 
 ## Current version
 
-`0.2.0`
+`0.3.0`
 
 ## Supported CLI targets
 
@@ -43,7 +43,7 @@ The installer:
 2. Downloads the latest Forge package from this repository.
 3. Installs the main `forge` skill.
 4. Installs the `forge-flash` companion skill.
-5. Copies the approved `rules/`, execution `modes/`, and `VERSION` into each installed skill package.
+5. Copies the approved `rules/`, execution `modes/`, companion commands, and `VERSION` into each installed skill package.
 6. Backs up existing Forge installations before replacing them.
 7. Prints the correct invocation commands for every installed agent.
 
@@ -131,7 +131,9 @@ Forge/
 ├── modes/
 │   └── flash.md
 ├── commands/
-│   └── forge-flash/
+│   ├── forge-flash/
+│   │   └── SKILL.md
+│   └── forge-update/
 │       └── SKILL.md
 ├── install/
 │   ├── install.ps1
@@ -203,4 +205,4 @@ Planned terminal management commands:
 | `forge version` | Show the installed Forge version. |
 | `forge doctor` | Diagnose Forge and agent integration. |
 
-For version `0.2.0`, use the one-line installer to install or update Forge.
+For version `0.3.0`, use `/forge-update` to update Forge, or run the one-line installer directly.

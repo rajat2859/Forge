@@ -124,6 +124,10 @@ try {
         throw "Downloaded Forge package does not contain the Forge Flash skill."
     }
 
+    if (-not (Test-Path (Join-Path $sourceRoot "commands\forge-update\SKILL.md"))) {
+        throw "Downloaded Forge package does not contain the Forge Update skill."
+    }
+
     $forgeVersion = (Get-Content (Join-Path $sourceRoot "VERSION") -Raw).Trim()
 
     Write-Host ""
@@ -143,6 +147,14 @@ try {
 
         if ($flashBackupPath) {
             Write-Host "       Previous Forge Flash installation backed up to $flashBackupPath"
+        }
+
+        $updateTargetPath = Join-Path (Split-Path -Parent $target.Path) "forge-update"
+        $updateBackupPath = Install-ForgeSkill -SourceRoot $sourceRoot -TargetPath $updateTargetPath -SkillEntry "commands\forge-update\SKILL.md"
+        Write-Host "  [OK] $($target.Name) Update -> $updateTargetPath"
+
+        if ($updateBackupPath) {
+            Write-Host "       Previous Forge Update installation backed up to $updateBackupPath"
         }
     }
 

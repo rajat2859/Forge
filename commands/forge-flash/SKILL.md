@@ -18,15 +18,16 @@ Before development:
 3. Read `rules/02-non-destructive-changes.md`.
 4. Read `rules/03-comments.md`.
 5. Read `rules/04-naming.md`.
-6. Read `modes/flash.md`.
-7. Perform the normal Forge project-rule discovery and conflict audit.
-8. Establish the complete active rule set before delegating work.
+6. Read `rules/05-git-commits.md`.
+7. Read `modes/flash.md`.
+8. Perform the normal Forge project-rule discovery and conflict audit.
+9. Establish the complete active rule set before delegating work.
 
 ## Hard inheritance requirement
 
 Every orchestrator, worker, subagent, integration agent, reviewer, and verifier created during Forge Flash must receive and obey:
 
-- all four approved Forge rules;
+- all five approved Forge rules;
 - applicable project rules;
 - user-approved conflict resolutions for the session;
 - the overall task objective;

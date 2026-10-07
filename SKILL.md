@@ -67,6 +67,10 @@ The files below are mandatory Forge rules:
 
 Read them when Forge activates. Re-read a specific rule when its exact wording matters.
 
+## Update
+
+The `/forge-update` command updates the installed Forge package using the repository installer. After updating, restart the coding-agent session so the new version is loaded.
+
 ## Execution modes
 
 Execution modes may change how Forge carries out work, but they never replace or weaken the approved Forge rules.

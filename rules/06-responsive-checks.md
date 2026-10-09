@@ -21,14 +21,24 @@ For backend-only changes with no possible user-interface impact, responsive chec
 Before declaring UI work complete:
 
 1. Identify the pages, components, states, and user flows affected by the change.
-2. Inspect the project's existing responsive breakpoints, design specifications, and responsive conventions. Reuse them rather than introducing arbitrary breakpoint values.
+2. Inspect the project's design specifications, CSS media queries, framework configuration, theme settings, and existing responsive conventions. Determine the actual breakpoints used by the project before choosing test widths.
 3. Run the changed interface in a browser and inspect its rendered behavior. Use Agent Browser as the primary browser tool when available; use Playwright as the fallback.
-4. Check the affected interface at representative mobile, tablet, and desktop viewport sizes. At minimum, cover a narrow mobile viewport around 320–375 CSS pixels, a typical mobile viewport around 390–430 CSS pixels, a tablet viewport around 768 CSS pixels, and a desktop viewport around 1280 CSS pixels or wider. Include widths around project-specific breakpoints when relevant.
-5. Check intermediate widths where the layout changes, and test both sides of important breakpoints to catch layout jumps or overlaps.
+4. Test relevant mobile, tablet, laptop, and desktop widths. Use the project's specified target devices and viewport sizes when available.
+5. Test both sides of every breakpoint that can affect the changed interface: at least one width just below the breakpoint, the breakpoint itself, and one width just above it. Check transitions where layout, navigation, visibility, columns, spacing, or component behavior changes.
 6. Exercise affected interactive states, including navigation menus, dropdowns, dialogs, tabs, forms, and expanded or collapsed content where applicable.
 7. Correct issues introduced by the current change, then repeat the relevant checks.
 
-Use the project's specified target devices and viewport sizes when they are available and more appropriate than these representative defaults.
+Do not assume a universal breakpoint set. If the project uses a CSS framework or design system, inspect its actual configuration and use the breakpoints it defines. The values below are common reference points for selecting additional viewport checks, not a replacement for project configuration:
+
+| Context | Common breakpoint or viewport widths |
+| --- | --- |
+| Narrow mobile | 320px, 360px |
+| Typical mobile | 375px, 390px, 414px, 430px |
+| Bootstrap-style breakpoints | 576px, 768px, 992px, 1200px, 1400px |
+| Tailwind-style breakpoints | 640px, 768px, 1024px, 1280px, 1536px |
+| Larger desktop | 1440px, 1600px, 1920px |
+
+Framework defaults may be customized. Confirm the actual values in the project before testing. Do not test every reference width mechanically if it cannot affect the changed interface; prioritize all relevant configured breakpoints, their transitions, the project's target devices, and representative widths between transitions.
 
 ## What to inspect
 
@@ -58,7 +68,8 @@ Do not introduce one-off overrides or duplicate breakpoint rules without checkin
 Before finishing UI work, report:
 
 - the relevant pages or components checked;
-- the viewport widths and interactive states tested;
+- the viewport widths and breakpoint transitions tested;
+- the interactive states tested;
 - responsive issues found and fixed;
 - any checks that could not be performed and why.
 
@@ -66,4 +77,4 @@ Never claim that responsive verification passed if the interface was not actuall
 
 ## Principle
 
-Responsive behavior is verified in the browser across relevant screen sizes; it is not assumed from the implementation.
+Responsive behavior is verified in the browser across relevant screen sizes and breakpoint transitions; it is not assumed from the implementation.

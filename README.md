@@ -1,73 +1,50 @@
 # Forge
 
-Forge is my portable development-rules layer for AI coding agents.
+**Portable development rules for AI coding agents.**
 
-Install Forge once, invoke it inside a supported coding agent, and let the agent work according to the same development standards across projects.
+Forge gives supported coding agents a consistent set of development standards and workflows across projects. Your coding agent does the work; Forge defines how that work should be approached, checked, and completed.
 
-Forge is not a coding agent. The coding agent is the worker; Forge is the development standards and workflow layer.
+## Contents
 
-## Current version
+- [Quick start](#quick-start)
+- [Supported agents](#supported-agents)
+- [How Forge works](#how-forge-works)
+- [Use Forge](#use-forge)
+- [Flash Mode](#flash-mode)
+- [Rules and project instructions](#rules-and-project-instructions)
+- [Update Forge](#update-forge)
+- [Repository structure](#repository-structure)
+- [Troubleshooting](#troubleshooting)
 
-`0.3.0`
+## Quick start
 
-## Supported CLI targets
+### 1. Install Forge
 
-The installer currently detects and installs Forge for:
-
-| Agent | Forge | Flash Mode |
-| --- | --- | --- |
-| Claude Code | `/forge` | `/forge-flash <task>` |
-| Antigravity CLI | `/forge` | `/forge-flash <task>` |
-| Codex | `$forge` | `$forge-flash <task>` |
-| OpenCode | `/forge` | `/forge-flash <task>` |
-
-Forge uses the same dynamically discovered rule files for every supported agent.
-
-## Install
-
-### Windows PowerShell
+**Windows PowerShell**
 
 ```powershell
 irm https://raw.githubusercontent.com/rajat2859/Forge/main/install/install.ps1 | iex
 ```
 
-### macOS / Linux / WSL
+**macOS, Linux, or WSL**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rajat2859/Forge/main/install/install.sh | bash
 ```
 
-The installer:
+The installer detects supported coding-agent CLIs in your `PATH`, downloads Forge, and installs its main skill, Flash companion, update command, rules, and execution modes. Existing installations are backed up before replacement.
 
-1. Detects supported coding-agent CLIs available in `PATH`.
-2. Downloads the latest Forge package from this repository.
-3. Installs the main `forge` skill.
-4. Installs the `forge-flash` companion skill.
-5. Copies the current `rules/` directory, execution `modes/`, companion commands, and `VERSION` into each installed skill package.
-6. Backs up existing Forge installations before replacing them.
-7. Prints the correct invocation commands for every installed agent.
+### 2. Restart your coding agent
 
-Restart any coding-agent session that was already open during installation so it can rediscover Forge.
+Restart any agent session that was open during installation so it can discover the installed skills.
 
-Re-running the installer currently acts as the update mechanism.
+### 3. Activate Forge
 
-## Use
-
-Start the coding agent from the project you want to work on.
-
-Example with Antigravity:
-
-```bash
-agy
-```
-
-Then activate normal Forge:
+Run the appropriate command from the project you want to work on:
 
 ```text
 /forge
 ```
-
-Claude Code and OpenCode also use `/forge`.
 
 Codex uses:
 
@@ -75,30 +52,55 @@ Codex uses:
 $forge
 ```
 
-When Forge activates, it should first:
+Forge audits the project's instructions, loads the current Forge rules, identifies conflicts, and establishes the working rules for the session before development begins.
 
-1. Find project-specific rules and instruction files.
-2. Read the relevant project instructions.
-3. Enumerate the current Markdown rule files in the installed `rules/` directory.
-4. Read every discovered Forge rule file in lexicographic path order.
-5. Compare the discovered Forge rules with project rules.
-6. Report conflicts in chat without changing either rule set.
-7. Let the user decide how conflicts should be handled.
-8. Establish the working rules for the session.
+## Supported agents
 
-The `rules/` directory is the single source of truth. Forge entry points must not hardcode rule filenames, maintain a fixed rule count, or require manual edits when rule files are added, changed, renamed, or removed. If the directory cannot be read or no rule files are found, Forge must stop before modifying the project and explain why.
+| Agent | Standard mode | Flash Mode |
+| --- | --- | --- |
+| Claude Code | `/forge` | `/forge-flash <task>` |
+| Antigravity CLI | `/forge` | `/forge-flash <task>` |
+| Codex | `$forge` | `$forge-flash <task>` |
+| OpenCode | `/forge` | `/forge-flash <task>` |
 
-## Flash Mode
+The installer detects the supported command-line agents available in your `PATH`. If an agent is not detected, make sure its CLI is installed and accessible from the terminal, then run the installer again.
 
-Use Flash Mode for large development tasks that benefit from multiple parallel agents.
+## How Forge works
 
-Example:
+Forge is a **standards and workflow layer**, not a separate coding agent.
+
+1. **Inspect the project.** Identify the workspace and locate applicable project instructions.
+2. **Load Forge rules.** Discover every Markdown rule file directly inside the installed `rules/` directory and read each file in lexicographic path order.
+3. **Resolve instruction conflicts.** Follow compatible instructions together. If Forge and project instructions conflict, explain the conflict and let the user decide how to proceed.
+4. **Work within the rules.** Apply the complete active rule set throughout the session.
+5. **Verify before completion.** Perform the checks required by the applicable rules and report anything that remains unverified.
+
+Forge does not silently edit, remove, or weaken project instructions to resolve a conflict.
+
+## Use Forge
+
+### Standard development
+
+Start your coding agent in the target project and invoke Forge:
+
+| Agent | Command |
+| --- | --- |
+| Claude Code | `/forge` |
+| Antigravity CLI | `/forge` |
+| Codex | `$forge` |
+| OpenCode | `/forge` |
+
+Then describe the development task as you normally would.
+
+### Flash Mode
+
+Use Flash for larger tasks that benefit from parallel work:
 
 ```text
 /forge-flash migrate this React app to Next.js with TypeScript
 ```
 
-Codex:
+For Codex:
 
 ```text
 $forge-flash migrate this React app to Next.js with TypeScript
@@ -107,27 +109,59 @@ $forge-flash migrate this React app to Next.js with TypeScript
 Flash Mode:
 
 1. Performs the normal Forge startup audit.
-2. Discovers and reads every current Forge rule file dynamically.
-3. Builds a dependency-aware execution plan.
-4. Splits independent work into explicit agent-owned workstreams.
-5. Passes the complete contents of every discovered Forge rule file, applicable project rules, and resolved conflicts to each delegated agent before it starts.
-6. Runs safe workstreams concurrently when the host supports parallel agents.
-7. Integrates all worker output centrally.
-8. Reviews the combined result.
-9. Runs applicable verification such as typecheck, lint, tests, and build.
+2. Discovers and reads the complete current Forge rule set.
+3. Builds a dependency-aware plan and separates work into agent-owned workstreams.
+4. Passes every discovered Forge rule, applicable project instruction, and user-approved conflict resolution to each delegated agent before work starts.
+5. Runs independent work in parallel when the host supports it.
+6. Integrates the results, reviews the combined changes, and runs applicable verification.
 
-Every Flash orchestrator, worker, subagent, integration agent, reviewer, and verifier must receive the complete active rule context before starting. Flash must not assume agents inherit the orchestrator's conversation or filesystem access. If the complete context cannot be passed or verified, it must not start that delegated work.
+**Parallel work does not bypass rules or verification.** If Flash cannot pass or verify the complete active rule context for a delegated agent, it must not start that work.
 
-Flash achieves speed through parallel execution, not by skipping rules, analysis, integration, review, or verification.
+## Rules and project instructions
 
-## Skill structure
+### The `rules/` directory is the source of truth
+
+Forge discovers the current Markdown rule files directly inside `rules/` at runtime. It does not rely on a hardcoded filename list, a fixed rule count, or a manually maintained rule inventory.
+
+That means:
+
+- **Add a rule:** the new Markdown file becomes part of the discovered rule set.
+- **Update a rule:** Forge reads and applies its current contents.
+- **Remove or rename a rule:** the discovered set reflects the directory's current contents.
+- **Missing or unreadable rules:** Forge must stop before modifying the project and explain the problem.
+
+Entry points must read the full contents of every discovered rule. Flash must pass the full active rule context to all delegated workers, reviewers, and verifiers before they begin.
+
+### Project instructions still matter
+
+Forge checks applicable project instruction files and follows them alongside Forge rules when they are compatible. When instructions conflict, Forge reports the conflict before affected work proceeds and leaves the resolution to the user.
+
+## Update Forge
+
+Re-run the installer to update the installed Forge package. The installer backs up existing installations before replacing them.
+
+**Windows PowerShell**
+
+```powershell
+irm https://raw.githubusercontent.com/rajat2859/Forge/main/install/install.ps1 | iex
+```
+
+**macOS, Linux, or WSL**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rajat2859/Forge/main/install/install.sh | bash
+```
+
+You can also invoke `/forge-update` from a supported agent. After updating, restart the coding-agent session so it loads the updated skills.
+
+## Repository structure
 
 ```text
 Forge/
 ├── SKILL.md
 ├── VERSION
 ├── rules/
-│   └── All current Markdown rule files are discovered dynamically
+│   └── Current Markdown rules, discovered dynamically
 ├── modes/
 │   └── flash.md
 ├── commands/
@@ -141,45 +175,34 @@ Forge/
 └── README.md
 ```
 
-`SKILL.md` is the portable Forge controller.
-
-The files in `rules/` are the source of truth and are discovered at runtime.
-
-`modes/flash.md` defines Flash execution behavior.
-
-`commands/forge-flash/SKILL.md` is the dedicated Flash entry point installed as the companion `forge-flash` skill.
-
-## Rule principles
-
-The specific development requirements live in the Markdown files inside `rules/`. Forge does not duplicate their individual names or maintain a separate numbered inventory here. All entry points discover and read the current files directly from that directory.
-
-## Execution modes
-
-### Flash Mode
-
-Flash is a large-task execution mode, not a replacement rule set.
-
-Its hard requirement is that every delegated agent inherits the complete active Forge rule set and applicable project rules.
-
-The orchestrator plans dependencies, assigns non-overlapping ownership where possible, executes safe work in parallel, integrates results, runs a whole-task review, and verifies the final result.
-
-## Planned companion commands
-
-| Command | Purpose |
+| Path | Purpose |
 | --- | --- |
-| `/forge-status` | Show Forge state, detected stack, discovered project rules, and unresolved conflicts. |
-| `/forge-rules` | Show a concise summary of active Forge rules. |
-| `/forge-conflicts` | Show unresolved Forge/project-rule conflicts. |
-| `/forge-recheck` | Re-scan project rules and configuration. |
-| `/forge-off` | Stop treating Forge as active for the current session. |
+| `SKILL.md` | Main Forge controller and startup workflow |
+| `rules/` | Source of truth for development standards |
+| `modes/flash.md` | Parallel execution behavior for Flash Mode |
+| `commands/forge-flash/` | Dedicated Flash companion skill |
+| `commands/forge-update/` | Update companion skill |
+| `install/` | Platform-specific installers |
+| `VERSION` | Forge package version |
 
-Planned terminal management commands:
+## Troubleshooting
 
-| Command | Purpose |
-| --- | --- |
-| `forge install` | Install Forge into supported agents. |
-| `forge update` | Update installed Forge copies. |
-| `forge version` | Show the installed Forge version. |
-| `forge doctor` | Diagnose Forge and agent integration. |
+**The installer does not detect my agent**
 
-For version `0.3.0`, use `/forge-update` to update Forge, or run the one-line installer directly.
+- Confirm the agent's CLI is installed.
+- Confirm its command is available in the same terminal where you run the installer.
+- Run the installer again after correcting your `PATH`.
+
+**The new Forge rules are not active**
+
+- Confirm the installation completed successfully.
+- Restart the coding-agent session.
+- Activate Forge again so it reads the installed rules.
+
+**Forge cannot read its rules**
+
+Forge must not continue with project modifications if the installed `rules/` directory is missing, unreadable, or empty. Check the installation and reinstall if needed.
+
+---
+
+Forge aims to make development standards consistent across supported agents while keeping project-specific instructions, user decisions, and verification in control.

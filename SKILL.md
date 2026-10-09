@@ -13,9 +13,27 @@ When Forge is explicitly invoked:
 
 1. Treat Forge as active for the current development session.
 2. Before modifying the project, perform the startup audit below.
-3. Read every approved Forge rule in the `rules/` directory.
-4. Apply the approved Forge rules to subsequent development work in the session.
+3. Discover and read every applicable Markdown rule file directly inside the installed `rules/` directory.
+4. Apply the complete discovered Forge rule set to subsequent development work in the session.
 5. Do not invent additional Forge rules. Normal engineering judgment may be used where Forge is silent, but it must not be presented as a Forge requirement.
+
+## Dynamic Forge rule discovery
+
+The `rules/` directory is the single source of truth for Forge rules. Never maintain a hardcoded list of rule filenames, a fixed rule count, or a manually synchronized inventory in an entry point.
+
+When loading Forge rules:
+
+1. Inspect the current contents of `rules/`.
+2. Discover every regular Markdown rule file directly inside that directory.
+3. Sort discovered file paths lexicographically for a stable reading order.
+4. Read the complete contents of every discovered rule file before beginning development.
+5. Apply every discovered rule; do not skip a file because its name or topic is unfamiliar.
+6. If the directory is missing, unreadable, or contains no rule files, stop before modifying the project and tell the user why the rules could not be loaded.
+7. Do not rely on cached rule lists from a previous session when the current directory can be inspected.
+
+Adding a rule file makes it part of the active Forge rule set. Removing a rule file removes it from the discovered set. Updating a rule file changes the content that must be read and applied. No entry point should need editing solely because a rule was added, removed, renamed, or changed.
+
+Use the host's filesystem or file-reading tools to enumerate and read the actual files. If a host cannot enumerate the directory directly, use its available file-listing capability to discover the files, then read every discovered file. Do not guess filenames.
 
 ## Startup audit
 
@@ -36,7 +54,7 @@ Before development begins:
    - `.github/`
    - other files that clearly define coding, architecture, workflow, Git, or agent instructions
 4. Read relevant project instructions before changing code.
-5. Compare project instructions with Forge.
+5. Compare project instructions with the complete discovered Forge rule set.
 6. If they are compatible, follow both.
 7. If they conflict, report the conflict in chat before affected work proceeds.
 8. Do not edit, delete, weaken, discard, or silently override project rules because of a conflict.
@@ -49,23 +67,11 @@ Do not indiscriminately load every documentation file. Find files that plausibly
 For each material conflict, explain:
 
 - the project rule;
-- the Forge rule;
+- the applicable Forge rule;
 - the conflict;
 - the practical effect of each option.
 
 Do not silently choose a winner.
-
-## Approved rules
-
-The files below are mandatory Forge rules:
-
-1. `rules/01-project-rules.md`
-2. `rules/02-non-destructive-changes.md`
-3. `rules/03-comments.md`
-4. `rules/04-naming.md`
-5. `rules/05-git-commits.md`
-
-Read them when Forge activates. Re-read a specific rule when its exact wording matters.
 
 ## Update
 
@@ -73,7 +79,7 @@ The `/forge-update` command updates the installed Forge package using the reposi
 
 ## Execution modes
 
-Execution modes may change how Forge carries out work, but they never replace or weaken the approved Forge rules.
+Execution modes may change how Forge carries out work, but they never replace or weaken the discovered Forge rules.
 
 Available mode:
 
@@ -87,7 +93,7 @@ The dedicated entry point is `/forge-flash <task>` on Claude Code, Antigravity C
 
 After the startup audit is complete:
 
-- apply Forge to development work;
+- apply all discovered Forge rules to development work;
 - continue respecting applicable project rules;
 - surface new rule conflicts when they become relevant;
 - do not treat pre-existing non-compliance as permission to clean it up;
@@ -99,11 +105,9 @@ If the platform reloads skills per turn, use Forge whenever the current task is 
 
 Before considering a Forge-governed change complete, confirm that:
 
-- no unresolved project-rule conflict was silently bypassed;
+- every applicable discovered Forge rule and project instruction was followed or any conflict was resolved with the user;
 - no destructive cleanup occurred merely to enforce Forge;
-- new comments follow the comment rule;
-- new names follow the naming rule;
-- meaningful completed work is committed according to the Git commit rule;
+- meaningful completed work is committed according to the applicable Git commit rules;
 - unrelated changes are not included in the commit;
 - sensitive files or credentials are not committed;
-- the commit message follows Conventional Commits.
+- commit messages follow any applicable commit-format rule.

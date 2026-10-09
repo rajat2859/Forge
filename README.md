@@ -21,7 +21,7 @@ The installer currently detects and installs Forge for:
 | Codex | `$forge` | `$forge-flash <task>` |
 | OpenCode | `/forge` | `/forge-flash <task>` |
 
-Forge uses the same rule files for every supported agent.
+Forge uses the same dynamically discovered rule files for every supported agent.
 
 ## Install
 
@@ -43,7 +43,7 @@ The installer:
 2. Downloads the latest Forge package from this repository.
 3. Installs the main `forge` skill.
 4. Installs the `forge-flash` companion skill.
-5. Copies the approved `rules/`, execution `modes/`, companion commands, and `VERSION` into each installed skill package.
+5. Copies the current `rules/` directory, execution `modes/`, companion commands, and `VERSION` into each installed skill package.
 6. Backs up existing Forge installations before replacing them.
 7. Prints the correct invocation commands for every installed agent.
 
@@ -79,12 +79,14 @@ When Forge activates, it should first:
 
 1. Find project-specific rules and instruction files.
 2. Read the relevant project instructions.
-3. Load the approved Forge rules.
-4. Compare Forge rules with project rules.
-5. Report conflicts in chat without changing either rule set.
-6. Let the user decide how conflicts should be handled.
-7. Establish the working rules for the session.
-8. Begin development.
+3. Enumerate the current Markdown rule files in the installed `rules/` directory.
+4. Read every discovered Forge rule file in lexicographic path order.
+5. Compare the discovered Forge rules with project rules.
+6. Report conflicts in chat without changing either rule set.
+7. Let the user decide how conflicts should be handled.
+8. Establish the working rules for the session.
+
+The `rules/` directory is the single source of truth. Forge entry points must not hardcode rule filenames, maintain a fixed rule count, or require manual edits when rule files are added, changed, renamed, or removed. If the directory cannot be read or no rule files are found, Forge must stop before modifying the project and explain why.
 
 ## Flash Mode
 
@@ -105,15 +107,16 @@ $forge-flash migrate this React app to Next.js with TypeScript
 Flash Mode:
 
 1. Performs the normal Forge startup audit.
-2. Loads all four approved Forge rules.
+2. Discovers and reads every current Forge rule file dynamically.
 3. Builds a dependency-aware execution plan.
 4. Splits independent work into explicit agent-owned workstreams.
-5. Runs safe workstreams concurrently when the host supports parallel agents.
-6. Integrates all worker output centrally.
-7. Reviews the combined result.
-8. Runs applicable verification such as typecheck, lint, tests, and build.
+5. Passes the complete contents of every discovered Forge rule file, applicable project rules, and resolved conflicts to each delegated agent before it starts.
+6. Runs safe workstreams concurrently when the host supports parallel agents.
+7. Integrates all worker output centrally.
+8. Reviews the combined result.
+9. Runs applicable verification such as typecheck, lint, tests, and build.
 
-**Every Flash orchestrator, worker, subagent, integration agent, reviewer, and verifier must follow all four Forge rules, applicable project rules, and session conflict resolutions.**
+Every Flash orchestrator, worker, subagent, integration agent, reviewer, and verifier must receive the complete active rule context before starting. Flash must not assume agents inherit the orchestrator's conversation or filesystem access. If the complete context cannot be passed or verified, it must not start that delegated work.
 
 Flash achieves speed through parallel execution, not by skipping rules, analysis, integration, review, or verification.
 
@@ -124,10 +127,7 @@ Forge/
 ├── SKILL.md
 ├── VERSION
 ├── rules/
-│   ├── 01-project-rules.md
-│   ├── 02-non-destructive-changes.md
-│   ├── 03-comments.md
-│   └── 04-naming.md
+│   └── All current Markdown rule files are discovered dynamically
 ├── modes/
 │   └── flash.md
 ├── commands/
@@ -143,38 +143,15 @@ Forge/
 
 `SKILL.md` is the portable Forge controller.
 
-The files in `rules/` are the approved development rules and remain the source of truth.
+The files in `rules/` are the source of truth and are discovered at runtime.
 
 `modes/flash.md` defines Flash execution behavior.
 
 `commands/forge-flash/SKILL.md` is the dedicated Flash entry point installed as the companion `forge-flash` skill.
 
-## Approved rule hierarchy
+## Rule principles
 
-### Startup
-
-1. **Discover project rules first and report conflicts**
-   - Discover project-specific rules and instructions before development begins.
-   - Do not edit, discard, or silently override project rule files because they conflict with Forge.
-   - Surface conflicts in chat and resolve them with the user.
-
-### Global safety
-
-2. **No destructive changes without approval**
-   - Do not remove existing code, files, dependencies, configuration, comments, logic, or structure merely because they do not comply with Forge.
-   - Flag existing non-compliance in chat first.
-   - Destructive cleanup requires explicit user approval.
-
-### Code quality
-
-3. **Comment discipline**
-   - Do not add comments that narrate obvious code.
-   - Avoid redundant, AI-style, line-by-line, decorative, or commented-out dead code.
-   - Use comments only when they provide necessary context the code itself cannot clearly express.
-
-4. **Clear, responsibility-based naming**
-   - Name components, sections, functions, variables, files, folders, services, and APIs according to what they represent or do.
-   - Avoid vague, generic, numbered, misleading, or unnecessarily abbreviated names when a meaningful name is possible.
+The specific development requirements live in the Markdown files inside `rules/`. Forge does not duplicate their individual names or maintain a separate numbered inventory here. All entry points discover and read the current files directly from that directory.
 
 ## Execution modes
 

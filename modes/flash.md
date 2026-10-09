@@ -4,7 +4,7 @@
 
 Flash Mode accelerates large development tasks by decomposing them into independent workstreams and executing safe workstreams concurrently with multiple agents.
 
-Flash Mode changes how work is executed. It does not change, weaken, replace, bypass, or selectively apply Forge rules.
+Flash Mode changes how work is executed. It does not change, weaken, replace, bypass, or selectively apply the active Forge rules.
 
 ## Activation
 
@@ -17,26 +17,30 @@ Supported invocation:
 - OpenCode: `/forge-flash <task>`
 - Codex: `$forge-flash <task>`
 
-If Flash Mode is requested from an already active Forge session, apply this mode to the requested task without dropping the existing Forge session rules.
+If Flash Mode is requested from an already active Forge session, refresh the discovered rule directory before planning the task and apply the current complete rule set.
 
 ## Mandatory rule inheritance
 
-Before any parallel work begins, the orchestrator must load and apply the complete active Forge rule set:
+Before any parallel work begins, the orchestrator must:
 
-1. `rules/01-project-rules.md`
-2. `rules/02-non-destructive-changes.md`
-3. `rules/03-comments.md`
-4. `rules/04-naming.md`
+1. Inspect the current installed `rules/` directory.
+2. Discover every regular Markdown rule file directly inside it.
+3. Sort discovered paths lexicographically.
+4. Read the complete contents of every discovered rule file.
+5. Stop before modifying the project if the directory is missing, unreadable, or contains no rule files.
+6. Complete the normal project-rule discovery and conflict audit.
 
-Every orchestrator, worker, subagent, integration agent, reviewer, verifier, or other delegated agent created by Flash Mode must operate under:
+The `rules/` directory is the single source of truth. Do not hardcode rule filenames, a fixed rule count, or a static list of approved rules in Flash Mode. Every file currently discovered in the directory belongs to the active rule set; additions, changes, renames, and removals are reflected on the next discovery.
 
-- all four approved Forge rules;
+Every orchestrator, worker, subagent, integration agent, reviewer, verifier, or other delegated agent created by Flash Mode must receive, before starting work:
+
+- the full contents of every currently discovered Forge rule file;
 - all applicable project-specific rules discovered during the startup audit;
 - every user-approved conflict resolution for the current session;
 - the overall task objective;
-- the delegated agent's exact scope and ownership.
+- the delegated agent's exact scope, ownership, dependencies, and constraints.
 
-The orchestrator is responsible for passing this active rule context to every delegated agent before that agent starts work.
+Pass the rule contents in the delegated agent's initial instructions or context. Do not merely tell agents to follow Forge, provide only a filename list, or assume shared conversation/filesystem context. If the host uses shared context, verify that the complete rules are available before work begins. If the complete context cannot be passed or verified, do not delegate that work; report the limitation and keep the work within the capabilities that preserve the rules.
 
 No Flash agent may be treated as exempt from Forge because it has a narrow, temporary, review-only, or verification-only role.
 
@@ -49,7 +53,7 @@ It must:
 1. identify the repository or workspace root;
 2. discover project-specific instruction and rule files;
 3. read relevant project instructions;
-4. load all approved Forge rules;
+4. discover and read the complete current Forge rule set;
 5. compare project instructions with Forge;
 6. report material conflicts in chat;
 7. wait for the user's decision where a conflict affects the requested work;
@@ -87,7 +91,7 @@ At minimum, the assignment should define:
 - dependencies it must wait for;
 - interfaces or contracts it must preserve;
 - work it must not modify;
-- the active Forge and project rules.
+- the complete active Forge and project rules.
 
 Prefer non-overlapping write ownership.
 
@@ -140,7 +144,7 @@ After worker tasks complete, an integration phase must:
 3. detect conflicting or overlapping changes;
 4. resolve integration issues;
 5. ensure the combined architecture remains coherent;
-6. confirm the combined work still follows all active Forge and project rules.
+6. confirm the combined work follows the complete active Forge and project rules.
 
 The integration agent or orchestrator must not blindly accept worker output.
 
@@ -162,7 +166,7 @@ The reviewer must evaluate the combined result for:
 - unnecessary comments;
 - unclear new naming.
 
-The reviewer follows the same complete active Forge rule set as every other Flash agent.
+The reviewer follows the same complete active Forge and project rule set as every other Flash agent.
 
 ## Verification
 
@@ -185,8 +189,8 @@ Flash Mode may consider the task complete only after:
 - the combined result has been reviewed;
 - applicable verification has passed or failures are clearly reported;
 - no unresolved Forge/project-rule conflict was silently bypassed;
-- all delegated agents were governed by the complete active Forge rule set.
+- every delegated agent received the complete active rule context before work began.
 
 ## Principle
 
-Flash Mode achieves speed through safe parallel execution, not by skipping analysis, Forge rules, project rules, integration, review, or verification.
+Flash Mode achieves speed through safe parallel execution, not by skipping analysis, rules, project instructions, integration, review, or verification.

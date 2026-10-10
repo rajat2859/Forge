@@ -30,35 +30,65 @@ All installation, activation, Flash Mode, and update commands are collected here
 
 ### Install Forge
 
-| Environment | Command | Description |
-| --- | --- | --- |
-| Windows PowerShell | `irm https://raw.githubusercontent.com/rajat2859/Forge/main/install/install.ps1 | iex` | Downloads and runs the Windows installer. |
-| macOS, Linux, or WSL | `curl -fsSL https://raw.githubusercontent.com/rajat2859/Forge/main/install/install.sh | bash` | Downloads and runs the shell installer. |
+Choose your operating system and copy the full command from the code block.
+
+**Windows PowerShell**
+
+Run this in PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/rajat2859/Forge/main/install/install.ps1 | iex
+```
+
+**macOS, Linux, or WSL**
+
+Run this in your terminal:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rajat2859/Forge/main/install/install.sh | bash
+```
 
 The installer detects supported coding-agent CLIs available in your `PATH`, downloads Forge, and installs its skills, rules, and execution modes. Existing installations are backed up before replacement.
 
 ### Agent commands
 
-| Agent | Command | Description |
-| --- | --- | --- |
-| Claude Code | `/forge` | Activate Forge standards for normal development work. |
-| Antigravity CLI | `/forge` | Activate Forge standards for normal development work. |
-| Codex | `$forge` | Activate Forge standards for normal development work. |
-| OpenCode | `/forge` | Activate Forge standards for normal development work. |
-| Claude Code | `/forge-flash <task>` | Run a larger task using dependency-aware parallel work when supported. |
-| Antigravity CLI | `/forge-flash <task>` | Run a larger task using dependency-aware parallel work when supported. |
-| Codex | `$forge-flash <task>` | Run a larger task using dependency-aware parallel work when supported. |
-| OpenCode | `/forge-flash <task>` | Run a larger task using dependency-aware parallel work when supported. |
-| Supported agent | `/forge-update` | Update the installed Forge package using the repository installer. |
+Copy the command for the coding agent you use.
 
-Replace `<task>` with the work you want Forge to perform. For example, a Flash task could be: `/forge-flash migrate this React app to Next.js with TypeScript`. For Codex, use the `$forge-flash` form shown in the table.
+| Agent | Standard command | Flash Mode command |
+| --- | --- | --- |
+| Claude Code | `/forge` | `/forge-flash <task>` |
+| Antigravity CLI | `/forge` | `/forge-flash <task>` |
+| Codex | `$forge` | `$forge-flash <task>` |
+| OpenCode | `/forge` | `/forge-flash <task>` |
+| Supported agent | `/forge-update` | Update Forge |
+
+Replace `<task>` with the work you want Forge to perform. For example:
+
+```text
+/forge-flash migrate this React app to Next.js with TypeScript
+```
+
+For Codex, use the `$forge-flash` form:
+
+```text
+$forge-flash migrate this React app to Next.js with TypeScript
+```
 
 ### Update Forge directly
 
-| Environment | Command | Description |
-| --- | --- | --- |
-| Windows PowerShell | `irm https://raw.githubusercontent.com/rajat2859/Forge/main/install/install.ps1 | iex` | Re-runs the Windows installer to update Forge. |
-| macOS, Linux, or WSL | `curl -fsSL https://raw.githubusercontent.com/rajat2859/Forge/main/install/install.sh | bash` | Re-runs the shell installer to update Forge. |
+Re-run the installer to update Forge. Choose the command for your operating system.
+
+**Windows PowerShell**
+
+```powershell
+irm https://raw.githubusercontent.com/rajat2859/Forge/main/install/install.ps1 | iex
+```
+
+**macOS, Linux, or WSL**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rajat2859/Forge/main/install/install.sh | bash
+```
 
 After updating, restart the coding-agent session so it loads the updated skills. The installer downloads from the repository's `main` branch, so changes on an unmerged pull request are not included yet.
 

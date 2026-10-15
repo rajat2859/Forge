@@ -2,50 +2,44 @@
 
 ## Purpose
 
-Keep code self-explanatory. Comments must not narrate code or explain obvious implementation steps.
+Keep code self-explanatory. Do not use comments to narrate code or explain obvious implementation steps.
 
 ## New and modified code
 
-- Do not add comments that describe what a line, statement, function, component, or block of code does when the code is understandable from its implementation and naming.
-- Do not add line-by-line narration, step-by-step explanations, AI-style summaries, or comments that merely restate identifiers, types, signatures, or nearby code.
-- Do not add decorative section headers or commented-out code.
-- Apply this standard to every new or modified code area, including code generated during refactoring, debugging, or feature work.
-- Do not add explanatory comments just to make generated code look more documented. Prefer clear structure, small functions, and specific names.
+- Do not add explanatory comments that describe what a line, statement, function, component, or block does when its implementation and naming are clear.
+- Do not add line-by-line narration, step-by-step explanations, AI-style summaries, or comments that restate identifiers, types, signatures, or nearby code.
+- Short labels are allowed when they help identify a section or function. Keep labels brief and descriptive; do not explain the implementation.
+- Examples of allowed short labels:
+  - `// Testimonial Section`
+  - `// URL Checker`
+- Do not add decorative banners or commented-out code.
+- Apply this rule to all new or modified code, including refactors, debugging, and feature work.
+- Prefer clear structure, small functions, and specific names over explanatory comments.
 
 ## Existing comments
 
-When encountering existing comments that only explain what the code does, repeat nearby code, or provide unnecessary narration:
+When encountering existing comments:
 
-1. Identify them as non-compliant with this rule.
-2. Report the relevant locations and why the comments are unnecessary.
-3. Ask for the user's approval before removing or rewriting them.
-4. Leave them unchanged until approval is given.
-
-Do not treat a request to write or modify code as automatic approval to perform broad comment cleanup. If the user explicitly asks to remove explanatory comments, remove the non-compliant comments within the requested scope.
+1. Keep useful context comments that explain a non-obvious constraint or decision.
+2. Report unnecessary explanatory comments and their locations.
+3. Ask for approval before removing or rewriting existing comments, unless the user explicitly requested their removal within the relevant scope.
 
 ## Allowed comments
 
-Comments are appropriate when they explain important context that is not clear from the code itself, including:
+Use comments only for:
+- Brief section or function labels.
+- Important context not clear from the code, such as business constraints, unusual technical decisions, compatibility workarounds, security requirements, performance trade-offs, complex algorithm rationale, external API constraints, or actionable TODO/FIXME notes.
 
-- non-obvious business constraints;
-- the reasoning behind an unusual technical decision;
-- compatibility workarounds or framework/browser issues;
-- security requirements or threat assumptions;
-- meaningful performance trade-offs;
-- complex algorithms whose rationale is not evident from the implementation;
-- external API constraints;
-- actionable TODO/FIXME notes with specific context.
-
-Prefer explaining why a constraint or decision exists rather than narrating the mechanics of the code.
+Keep labels short. Do not write paragraphs or explain how the code works.
 
 ## Review checklist
 
-Before completing a change, inspect the changed code for comments and verify that:
-
-- no unnecessary explanatory comments were introduced;
-- existing useful comments were preserved;
-- existing non-compliant comments were reported instead of silently removed, unless the user approved their removal.
+Before completing a change, verify that:
+- no unnecessary explanatory comments were added;
+- short labels are brief and descriptive;
+- useful context comments were preserved;
+- existing comments were not silently removed unless the user approved their removal.
 
 ## Principle
 
-Code should explain what it does. Comments should explain only the non-obvious why.
+Code explains what it does. Comments provide only short labels or essential non-obvious context.
